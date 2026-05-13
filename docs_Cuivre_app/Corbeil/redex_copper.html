@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REDEX — Fils & Méplats de Cuivre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cu: #C87941;
+    --cu-dark: #8B4E1F;
+    --cu-light: #F5E6D3;
+    --cu-pale: #FDF6EF;
+    --navy: #0F1B2D;
+    --navy-mid: #1E2F45;
+    --muted: #718096;
+    --border: rgba(200,121,65,0.15);
+    --border-strong: rgba(200,121,65,0.35);
+    --white: #FFFFFF;
+    --bg: #FAFAF8;
+    --radius: 16px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; overflow-x: hidden; }
+
+  /* HEADER */
+  header {
+    background: var(--navy); padding: 0 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px; position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid rgba(200,121,65,0.25);
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--white); letter-spacing: 0.05em; }
+  .logo span { color: var(--cu); }
+  .header-subtitle { font-size: 0.75rem; color: rgba(255,255,255,0.45); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* HERO */
+  .hero { background: var(--navy); padding: 4rem 2.5rem 3rem; position: relative; overflow: hidden; }
+  .hero::before {
+    content: 'Cu'; position: absolute; right: -2rem; top: -1rem;
+    font-family: 'Syne', sans-serif; font-size: 14rem; font-weight: 800;
+    color: rgba(200,121,65,0.06); line-height: 1; pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-block; background: rgba(200,121,65,0.15); color: var(--cu);
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(200,121,65,0.3); margin-bottom: 1.2rem;
+  }
+  .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; color: var(--white); line-height: 1.15; max-width: 600px; margin-bottom: 1rem; }
+  .hero h1 em { font-style: normal; color: var(--cu); }
+  .hero-desc { color: rgba(255,255,255,0.5); font-size: 0.95rem; max-width: 480px; line-height: 1.7; margin-bottom: 2rem; }
+  .hero-stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+  .hero-stat-num { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--cu); }
+  .hero-stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* BREADCRUMB */
+  .breadcrumb {
+    background: var(--white); border-bottom: 1px solid var(--border);
+    padding: 0.85rem 2.5rem; display: flex; align-items: center; gap: 8px;
+    font-size: 0.8rem; color: var(--muted); flex-wrap: wrap;
+  }
+  .breadcrumb-item { cursor: pointer; color: var(--cu); font-weight: 500; transition: opacity 0.2s; }
+  .breadcrumb-item:hover { opacity: 0.7; }
+  .breadcrumb-sep { color: var(--border-strong); }
+  .breadcrumb-current { color: var(--navy); font-weight: 500; }
+
+  /* MAIN */
+  main { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem; }
+  .section-header { margin-bottom: 1.8rem; }
+  .section-label { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cu); font-weight: 500; margin-bottom: 0.4rem; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--navy); }
+
+  /* VIEWS */
+  .view { display: none; animation: fadeIn 0.35s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* SECTORS */
+  .sectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+  .sector-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.8rem; cursor: pointer; transition: all 0.25s ease; position: relative; overflow: hidden;
+  }
+  .sector-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: var(--cu); transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease;
+  }
+  .sector-card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(15,27,45,0.08); }
+  .sector-card:hover::after { transform: scaleX(1); }
+  .sector-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--cu-light); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1.2rem; }
+  .sector-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem; }
+  .sector-count { font-size: 0.78rem; color: var(--muted); }
+  .sector-arrow { position: absolute; top: 1.8rem; right: 1.8rem; width: 28px; height: 28px; border-radius: 50%; background: var(--cu-pale); display: flex; align-items: center; justify-content: center; color: var(--cu); font-size: 0.85rem; transition: all 0.2s; }
+  .sector-card:hover .sector-arrow { background: var(--cu); color: var(--white); }
+  .sector-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1rem; }
+  .sector-tag { font-size: 0.68rem; background: var(--cu-pale); color: var(--cu-dark); border-radius: 20px; padding: 3px 10px; border: 1px solid var(--border); }
+
+  /* PRODUCTS */
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.1rem; }
+  .product-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    cursor: pointer; transition: all 0.25s ease; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .product-card:hover { border-color: var(--cu); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(200,121,65,0.12); }
+
+  .product-img-wrap { width: 100%; height: 160px; overflow: hidden; background: var(--cu-light); position: relative; flex-shrink: 0; }
+  .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+  .product-card:hover .product-img-wrap img { transform: scale(1.06); }
+  .product-img-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background: linear-gradient(135deg, var(--cu-light), var(--cu-pale)); }
+  .product-img-grade { position: absolute; top: 10px; right: 10px; background: var(--navy); color: var(--cu); font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; }
+  .product-body { padding: 1.2rem; flex: 1; }
+  .product-name { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 0.3rem; line-height: 1.3; }
+  .product-semi { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.8rem; }
+  .product-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+  .badge { font-size: 0.63rem; font-weight: 500; padding: 3px 7px; border-radius: 4px; }
+  .badge-machine { background: rgba(15,27,45,0.07); color: var(--navy-mid); border: 1px solid rgba(15,27,45,0.12); }
+  .badge-in { background: #EDF2FF; color: #2B4CC8; border: 1px solid #BFD0FF; }
+  .badge-out { background: #F0FFF4; color: #1A6B35; border: 1px solid #B5E5C5; }
+
+  /* DETAIL */
+  .detail-top { display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem; margin-bottom: 1.5rem; align-items: start; }
+  .detail-img-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .detail-img-wrap { width: 100%; height: 250px; background: var(--cu-light); overflow: hidden; position: relative; }
+  .detail-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-img-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; background: linear-gradient(135deg, var(--cu-light), var(--cu-pale)); }
+  .detail-img-caption { padding: 1rem 1.2rem; border-top: 1px solid var(--border); }
+  .detail-img-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.3rem; }
+  .detail-img-semi { font-size: 0.78rem; color: var(--muted); }
+
+  .detail-cards-col { display: flex; flex-direction: column; gap: 1rem; }
+  .detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .detail-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.6rem; }
+  .detail-card-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cu); margin-bottom: 1.1rem; display: flex; align-items: center; gap: 8px; }
+  .detail-card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Grade */
+  .grade-hero { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1.1rem; background: var(--navy); border-radius: 10px; margin-bottom: 1rem; }
+  .grade-symbol { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--cu); }
+  .grade-full-name { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .grade-nfa { font-size: 0.63rem; background: rgba(200,121,65,0.2); color: var(--cu); border-radius: 4px; padding: 2px 7px; margin-top: 4px; display: inline-block; }
+
+  /* Gauges */
+  .gauge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .gauge-label { font-size: 0.72rem; color: var(--muted); width: 115px; flex-shrink: 0; }
+  .gauge-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .gauge-fill { height: 100%; background: linear-gradient(90deg, var(--cu-dark), var(--cu)); border-radius: 3px; }
+  .gauge-val { font-size: 0.67rem; font-weight: 500; color: var(--navy); width: 68px; text-align: right; flex-shrink: 0; }
+
+  /* Props */
+  .props-table { width: 100%; border-collapse: separate; border-spacing: 0 7px; }
+  .props-table td { padding: 8px 12px; font-size: 0.79rem; }
+  .props-table tr td:first-child { color: var(--muted); width: 45%; background: var(--bg); border-radius: 8px 0 0 8px; }
+  .props-table tr td:last-child { font-weight: 500; color: var(--navy); background: var(--bg); border-radius: 0 8px 8px 0; }
+
+  /* Machine */
+  .machine-top { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--cu-pale); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem; }
+  .machine-icon-big { width: 46px; height: 46px; border-radius: 10px; background: var(--cu); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+  .machine-name { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--navy); }
+  .machine-sub { font-size: 0.7rem; color: var(--muted); margin: 2px 0 5px; }
+  .machine-desc { font-size: 0.77rem; color: var(--navy); line-height: 1.6; }
+
+  /* Machine image */
+  .machine-img-wrap { width: 100%; height: 185px; border-radius: 10px; overflow: hidden; background: var(--cu-light); border: 1px solid var(--border); margin-bottom: 1rem; position: relative; }
+  .machine-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .machine-img-placeholder {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px;
+    background: linear-gradient(135deg, var(--cu-light), var(--cu-pale));
+  }
+  .machine-img-placeholder-label { font-size: 0.7rem; color: var(--muted); text-align: center; padding: 0 1rem; line-height: 1.5; }
+  .machine-img-path { font-size: 0.62rem; color: rgba(113,128,150,0.6); font-family: monospace; }
+
+  /* Process */
+  .process-flow { display: flex; align-items: center; flex-wrap: wrap; margin: 0.5rem 0; gap: 0; }
+  .process-box { background: var(--cu-pale); border: 1.5px solid var(--border-strong); border-radius: 8px; padding: 9px 12px; text-align: center; }
+  .process-box-label { font-size: 0.63rem; color: var(--muted); margin-bottom: 2px; }
+  .process-box-val { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--navy); }
+  .process-arrow { width: 26px; height: 2px; background: var(--cu); position: relative; flex-shrink: 0; }
+  .process-arrow::after { content: ''; position: absolute; right: -1px; top: -4px; border-left: 7px solid var(--cu); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+
+  /* App chips */
+  .app-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--cu-pale); border: 1px solid var(--border); border-radius: 20px; padding: 4px 11px; font-size: 0.69rem; color: var(--cu-dark); margin: 3px; cursor: pointer; transition: all 0.2s; }
+  .app-chip:hover { background: var(--cu); color: var(--white); border-color: var(--cu); }
+
+  /* Back */
+  .back-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--cu); font-weight: 500; cursor: pointer; margin-bottom: 1.8rem; padding: 7px 14px; background: var(--cu-pale); border: 1px solid var(--border); border-radius: 20px; transition: all 0.2s; }
+  .back-btn:hover { background: var(--cu); color: var(--white); border-color: var(--cu); }
+
+  /* Desc */
+  .desc-box { padding: 0.9rem 1rem; background: var(--cu-pale); border-radius: 8px; border: 1px solid var(--border); font-size: 0.79rem; color: var(--navy); line-height: 1.65; }
+  .desc-label { font-size: 0.63rem; color: var(--muted); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* Stat mini grid */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-cell { padding: 8px 10px; background: var(--bg); border-radius: 8px; font-size: 0.75rem; }
+  .stat-cell-label { color: var(--muted); margin-bottom: 2px; font-size: 0.68rem; }
+  .stat-cell-val { font-weight: 600; color: var(--navy); }
+
+  /* Footer */
+  footer { background: var(--navy); color: rgba(255,255,255,0.35); text-align: center; padding: 1.5rem; font-size: 0.75rem; margin-top: 4rem; border-top: 1px solid rgba(200,121,65,0.2); }
+
+  /* Responsive */
+  @media (max-width: 900px) { .detail-top { grid-template-columns: 1fr; } .detail-layout { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { header { padding: 0 1.2rem; } .hero { padding: 2.5rem 1.2rem 2rem; } .breadcrumb { padding: 0.7rem 1.2rem; } main { padding: 1.5rem 1rem; } .sectors-grid { grid-template-columns: 1fr; } .products-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 400px) { .products-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">RE<span>DEX</span></div>
+  <div class="header-subtitle">Fils &amp; Méplats de Cuivre</div>
+</header>
+
+<div class="hero">
+  <div class="hero-tag">Base de données interactive</div>
+  <h1>Obtention de <em>fils</em> et<br>méplats de <em>cuivre</em></h1>
+  <p class="hero-desc">Explorez les secteurs d'application, les grades de cuivre et les machines REDEX selon vos besoins industriels.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">Secteurs</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">22+</div><div class="hero-stat-label">Applications</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Grades Cu</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">Machines REDEX</div></div>
+  </div>
+</div>
+
+<div class="breadcrumb" id="breadcrumb">
+  <span class="breadcrumb-current">Tous les secteurs</span>
+</div>
+
+<main>
+  <div class="view active" id="view-sectors">
+    <div class="section-header">
+      <div class="section-label">Secteurs d'activité</div>
+      <div class="section-title">Sélectionnez un secteur</div>
+    </div>
+    <div class="sectors-grid" id="sectors-grid"></div>
+  </div>
+
+  <div class="view" id="view-products">
+    <span class="back-btn" onclick="showSectors()">← Retour aux secteurs</span>
+    <div class="section-header">
+      <div class="section-label" id="prod-sector-label"></div>
+      <div class="section-title" id="prod-sector-title"></div>
+    </div>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+
+  <div class="view" id="view-detail">
+    <span class="back-btn" onclick="showProducts()">← Retour aux applications</span>
+    <div class="section-header">
+      <div class="section-label" id="detail-sector-label"></div>
+      <div class="section-title" id="detail-product-title"></div>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</main>
+
+<footer>© 2025 REDEX · Projet de stage — Livia Viana Aguiar de Oliveira</footer>
+
+<script>
+const gradeInfo = {
+  'Cu-ETP': {
+    name: 'Copper Electrolytic Tough-Pitch', nfa: 'Cu/a1', purity: '≥ 99,90 %',
+    conductEl: '100% IACS', conductTh: '393 W/m.K', soudabilite: 'Non recommandé', sensibilite: 'Sensible (H₂)',
+    gauge: { el: 100, th: 99, soud: 10 },
+    description: 'Grade le plus courant. Excellent conducteur électrique, utilisé dans la majorité des applications électriques et de transport. Sensible aux atmosphères réductrices à haute température (fragilisation par H₂). Obtenu par affinage électrolytique.'
+  },
+  'Cu-DHP': {
+    name: 'Copper Deoxided High-Phosphorus', nfa: 'Cu/b1', purity: '≥ 99,90 %',
+    conductEl: '≥ 75% IACS', conductTh: '305 W/m.K', soudabilite: 'Excellente', sensibilite: 'Insensible',
+    gauge: { el: 75, th: 77, soud: 100 },
+    description: 'Désoxydé au phosphore (0,013–0,050%). Conductivité électrique réduite mais excellente soudabilité. Insensible aux atmosphères réductrices. Idéal pour la plomberie, les tubes et la chaudronnerie.'
+  },
+  'Cu-DLP': {
+    name: 'Copper Deoxided Low-Phosphorus', nfa: 'Cu/b2', purity: '≥ 99,90 %',
+    conductEl: '92% IACS', conductTh: '380 W/m.K', soudabilite: 'Bonne', sensibilite: 'Insensible',
+    gauge: { el: 92, th: 96, soud: 80 },
+    description: 'Compromis optimal entre conductivité électrique et soudabilité. Phosphore résiduel faible (0,005–0,012%). Très polyvalent pour les applications nécessitant bonnes propriétés électriques et aptitude au soudage.'
+  },
+  'Cu-OF': {
+    name: 'Copper Oxygen-Free', nfa: 'Cu/c1', purity: '≥ 99,95 %',
+    conductEl: '102% IACS', conductTh: '394 W/m.K', soudabilite: 'Excellente', sensibilite: 'Insensible',
+    gauge: { el: 100, th: 100, soud: 100 },
+    description: 'Haute pureté, sans oxygène. Conductivité maximale, insensible aux atmosphères réductrices. Grade premium obtenu par refusion sous atmosphère contrôlée. Indispensable pour l\'électronique de précision et les câbles haute performance.'
+  }
+};
+
+const machineInfo = {
+  'RM': {
+    name: 'RM', full: 'Reduction Rolling Mills', sub: 'Laminoir de réduction à fils', icon: '⚙️',
+    img: 'images/machines/RM_machine.jpg',
+    desc: 'Transforme un fil machine rond (copper rod) en fil rond de diamètre réduit précis. Machine haute vitesse, multi-passes, pour fils électriques, magnet wires et câbles.'
+  },
+  'RMW': {
+    name: 'RMW', full: 'Rectangular Magnet Wire Rolling Mill', sub: 'Laminoir à fil magnétique rectangulaire', icon: '🔩',
+    img: 'images/machines/RMW_machine.jpg',
+    desc: 'Convertit un fil rond en fil plat (méplat) rectangulaire. La Shaping Unit garantit les tolérances dimensionnelles strictes requises pour les magnet wires et busbars.'
+  },
+  'FRM': {
+    name: 'FRM', full: 'Flat Rolling Mills', sub: 'Laminoir de bandes', icon: '🏭',
+    img: 'images/machines/FRM_machine.jpg',
+    desc: 'Lamine des barres ou blocs coulés pour produire des bandes larges et méplats. Configuration 2-Hi ou 4-Hi selon l\'épaisseur et la précision requises.'
+  }
+};
+
+const sectors = [
+  { id: 'energie', name: 'Énergie', icon: '⚡', tags: ['Transformateurs', 'Générateurs', 'CTC'], products: [
+    { name: 'Transformateur',         semi: 'Enroulement (bobine)',        grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod',   sortie: 'Fil rond',        img: 'images/transformateur.png' },
+    { name: 'Conducteur électrique',  semi: 'Câble électrique',            grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod',   sortie: 'Fil rond',        img: 'images/conducteurelectrique.png' },
+    { name: 'Générateur — Stator',    semi: 'Enroulement stator',          grade: 'Cu-OF',  machine: 'RM',  entree: 'Copper rod',   sortie: 'Fil rond',        img: 'images/stator_generateur.jpg' },
+    { name: 'Générateur — Roteur',    semi: 'Barres de cuivre du roteur',  grade: 'Cu-OF',  machine: 'FRM', entree: 'Barre coulée', sortie: 'Bande',           img: 'images/rotor_generateur.jpg' },
+    { name: 'Générateur — CTC',       semi: 'Conducteur transposé continu',grade: 'Cu-OF',  machine: 'RMW', entree: 'Copper rod',   sortie: 'Fil plat',        img: 'images/ctc_generateur.png' },
+    { name: 'CTC (câbles)',            semi: 'Bande conductrice',           grade: 'Cu-OF',  machine: 'FRM', entree: 'Barre coulée', sortie: 'Bande',           img: 'images/CTC_cables.png' }
+  ]},
+  { id: 'transport', name: 'Transport', icon: '🚗', tags: ['Câbles auto', 'EV', 'Ferroviaire'], products: [
+    { name: 'Câbles pour voiture', semi: 'Fil cuivre',        grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod', sortie: 'Fil rond',       img: 'images/cables_voiture.png' },
+    { name: 'Composants EV',       semi: 'Magnet wires',      grade: 'Cu-OF',  machine: 'RMW', entree: 'Copper rod', sortie: 'Fil plat',       img: 'images/composants_EV.png' },
+    { name: 'Fils caténaires',     semi: 'Câble de contact',  grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod', sortie: 'Profil extrudé', img: 'images/fils_catenaires.png' }
+  ]},
+  { id: 'electronique', name: 'Électronique', icon: '💻', tags: ['PCB', 'Busbars', 'Semi-conducteurs'], products: [
+    { name: 'Inducteur',             semi: 'Enroulement',             grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod',   sortie: 'Fil rond', img: 'images/inducteur.png' },
+    { name: 'Plaque de circuit',     semi: 'Plaque / Bande',          grade: 'Cu-ETP', machine: 'FRM', entree: 'Barre coulée', sortie: 'Bande',    img: 'images/plaques_ckts.png' },
+    { name: 'Busbars',               semi: 'Barre rectangulaire',     grade: 'Cu-ETP', machine: 'FRM', entree: 'Barre coulée', sortie: 'Bande',    img: 'images/busbars.png' },
+    { name: 'Puces électroniques',   semi: 'Plaque semiconducteur',   grade: 'Cu-OF',  machine: 'FRM', entree: 'Barre coulée', sortie: 'Bande',    img: 'images/puces_electroniques.png' },
+    { name: 'Dissipateur thermique', semi: 'Bande',                   grade: 'Cu-OF',  machine: 'FRM', entree: 'Barre coulée', sortie: 'Bande',    img: 'images/dissipateur_thermique_electronic.png' },
+    { name: 'Rubans PV',             semi: 'Fil plat photovoltaïque', grade: 'Cu-OF',  machine: 'RMW', entree: 'Copper rod',   sortie: 'Fil plat', img: 'images/ruban_interconnexionPV.png' },
+    { name: 'HFI Speaker Cable',     semi: 'Câble audio Hi-Fi',       grade: 'Cu-OF',  machine: 'RM',  entree: 'Copper rod',   sortie: 'Fil rond', img: 'images/HFI_speaker_cable.png' }
+  ]},
+  { id: 'automobile', name: 'Automobile', icon: '🏎️', tags: ['Faisceau', 'Alternateur', 'Batterie EV'], products: [
+    { name: 'Faisceau électrique',      semi: 'Câble',              grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod',   sortie: 'Fil rond', img: 'images/faisceu_voiture.png' },
+    { name: 'Busbar batterie EV',       semi: 'Barre rectangulaire',grade: 'Cu-ETP', machine: 'FRM', entree: 'Barre coulée', sortie: 'Bande',    img: 'images/busbar_batterieEV.png' },
+    { name: 'Alternateur',              semi: 'Enroulement roteur', grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod',   sortie: 'Fil rond', img: 'images/alternateur_vehicule.png' },
+    { name: 'Bobine électromagnétique', semi: 'Fil rond émaillé',   grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod',   sortie: 'Fil rond', img: 'images/bobine_electromag_voiture.png' }
+  ]},
+  { id: 'bijoux', name: 'Bijoux & Montres', icon: '💍', tags: ['Colliers', 'Montres', 'Décoration'], products: [
+    { name: 'Colliers ronds', semi: 'Fil rond bijouterie', grade: 'Cu-ETP', machine: 'RM',  entree: 'Copper rod', sortie: 'Fil rond', img: 'images/coliers_rond.png' },
+    { name: 'Colliers plats', semi: 'Fil plat bijouterie', grade: 'Cu-ETP', machine: 'RMW', entree: 'Copper rod', sortie: 'Fil plat', img: 'images/coliers_plats.png' }
+  ]}
+];
+
+let currentSector = null, currentProduct = null;
+
+function mkImg(src, cssStyle, fallback) {
+  return `<img src="${src}" style="${cssStyle}" alt="" onerror="this.outerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:linear-gradient(135deg,#F5E6D3,#FDF6EF);\\'>${fallback}</div>'">`;
+}
+
+function renderSectors() {
+  document.getElementById('sectors-grid').innerHTML = sectors.map(s => `
+    <div class="sector-card" onclick="selectSector('${s.id}')">
+      <div class="sector-icon">${s.icon}</div>
+      <div class="sector-name">${s.name}</div>
+      <div class="sector-count">${s.products.length} application${s.products.length>1?'s':''}</div>
+      <div class="sector-tags">${s.tags.map(t=>`<span class="sector-tag">${t}</span>`).join('')}</div>
+      <div class="sector-arrow">→</div>
+    </div>`).join('');
+}
+
+function selectSector(id) {
+  currentSector = sectors.find(s => s.id === id);
+  renderProducts(currentSector);
+  showView('view-products');
+  updateBreadcrumb([{label:'Tous les secteurs',action:'showSectors'},{label:currentSector.name}]);
+}
+
+function renderProducts(sector) {
+  document.getElementById('prod-sector-label').textContent = 'Secteur · ' + sector.name;
+  document.getElementById('prod-sector-title').textContent = 'Applications disponibles';
+  document.getElementById('products-grid').innerHTML = sector.products.map((p,i) => `
+    <div class="product-card" onclick="selectProduct(${i})">
+      <div class="product-img-wrap">
+        ${mkImg(p.img,'width:100%;height:100%;object-fit:cover;transition:transform .4s','🔩')}
+        <div class="product-img-grade">${p.grade}</div>
+      </div>
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        <div class="product-semi">${p.semi}</div>
+        <div class="product-badges">
+          <span class="badge badge-machine">${p.machine}</span>
+          <span class="badge badge-in">↳ ${p.entree}</span>
+          <span class="badge badge-out">→ ${p.sortie}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function selectProduct(idx) {
+  currentProduct = currentSector.products[idx];
+  renderDetail(currentProduct);
+  showView('view-detail');
+  updateBreadcrumb([
+    {label:'Tous les secteurs',action:'showSectors'},
+    {label:currentSector.name,action:'showProducts'},
+    {label:currentProduct.name}
+  ]);
+}
+
+function renderDetail(p) {
+  document.getElementById('detail-sector-label').textContent = currentSector.name + ' · ' + p.semi;
+  document.getElementById('detail-product-title').textContent = p.name;
+  const g = gradeInfo[p.grade];
+  const m = machineInfo[p.machine];
+  const similar = getSimilarApps(p.grade, p.machine);
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-top">
+      <!-- Image produit -->
+      <div class="detail-img-card">
+        <div class="detail-img-wrap">
+          ${mkImg(p.img,'width:100%;height:100%;object-fit:cover;','🔩')}
+        </div>
+        <div class="detail-img-caption">
+          <div class="detail-img-name">${p.name}</div>
+          <div class="detail-img-semi">${p.semi}</div>
+        </div>
+      </div>
+
+      <div class="detail-cards-col">
+        <!-- Flux de transformation -->
+        <div class="detail-card" style="padding:1.3rem;">
+          <div class="detail-card-title">Flux de transformation</div>
+          <div class="process-flow">
+            <div class="process-box"><div class="process-box-label">Entrée</div><div class="process-box-val">${p.entree}</div></div>
+            <div class="process-arrow"></div>
+            <div class="process-box" style="background:var(--navy);border-color:var(--cu);">
+              <div class="process-box-label" style="color:rgba(255,255,255,0.5);">Machine</div>
+              <div class="process-box-val" style="color:var(--cu);">${p.machine}</div>
+            </div>
+            <div class="process-arrow"></div>
+            <div class="process-box" style="background:rgba(26,107,53,0.08);border-color:rgba(26,107,53,0.35);">
+              <div class="process-box-label" style="color:rgba(26,107,53,0.7);">Sortie</div>
+              <div class="process-box-val" style="color:#1A6B35;">${p.sortie}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grade quick -->
+        <div class="detail-card" style="padding:1.3rem;">
+          <div class="detail-card-title">Grade de cuivre</div>
+          <div class="grade-hero" style="margin-bottom:0.9rem;">
+            <div>
+              <div class="grade-symbol">${p.grade}</div>
+              <div class="grade-full-name">${g.name}</div>
+              <div class="grade-nfa">≡ ${g.nfa} (NFA 51-050)</div>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-cell"><div class="stat-cell-label">Conductivité él.</div><div class="stat-cell-val">${g.conductEl}</div></div>
+            <div class="stat-cell"><div class="stat-cell-label">Conductivité th.</div><div class="stat-cell-val">${g.conductTh}</div></div>
+            <div class="stat-cell"><div class="stat-cell-label">Pureté</div><div class="stat-cell-val">${g.purity}</div></div>
+            <div class="stat-cell"><div class="stat-cell-label">Soudabilité</div><div class="stat-cell-val" style="font-size:0.67rem;">${g.soudabilite}</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bas : Grade complet + Machine -->
+    <div class="detail-layout">
+
+      <div class="detail-card">
+        <div class="detail-card-title">Propriétés — ${p.grade}</div>
+        <div class="gauge-row"><span class="gauge-label">Conductivité él.</span><div class="gauge-track"><div class="gauge-fill" style="width:${Math.min(g.gauge.el,100)}%"></div></div><span class="gauge-val">${g.conductEl}</span></div>
+        <div class="gauge-row"><span class="gauge-label">Conductivité th.</span><div class="gauge-track"><div class="gauge-fill" style="width:${g.gauge.th}%"></div></div><span class="gauge-val">${g.conductTh}</span></div>
+        <div class="gauge-row"><span class="gauge-label">Soudabilité</span><div class="gauge-track"><div class="gauge-fill" style="width:${g.gauge.soud}%"></div></div><span class="gauge-val" style="font-size:0.6rem;">${g.soudabilite}</span></div>
+        <table class="props-table" style="margin-top:0.5rem;">
+          <tr><td>Pureté</td><td>${g.purity}</td></tr>
+          <tr><td>Équiv. NFA 51-050</td><td>${g.nfa}</td></tr>
+          <tr><td>Sensibilité H₂</td><td>${g.sensibilite}</td></tr>
+        </table>
+        <div style="margin-top:1rem;"><div class="desc-label">Description</div><div class="desc-box">${g.description}</div></div>
+        ${similar.length ? `<div style="margin-top:1rem;"><div class="desc-label">Applications similaires</div><div>${similar.map(a=>`<span class="app-chip" onclick="findAndSelect('${a.sector}','${a.name}')">↗ ${a.name}</span>`).join('')}</div></div>` : ''}
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card-title">Machine REDEX — ${m.name}</div>
+        <div class="machine-top">
+          <div class="machine-icon-big">${m.icon}</div>
+          <div>
+            <div class="machine-name">${m.full}</div>
+            <div class="machine-sub">${m.sub}</div>
+            <div class="machine-desc">${m.desc}</div>
+          </div>
+        </div>
+
+        <!-- Image machine -->
+        <div class="machine-img-wrap">
+          <img src="${m.img}" alt="Machine ${m.name}" style="width:100%;height:100%;object-fit:cover;"
+            onerror="this.parentElement.innerHTML='<div class=\\'machine-img-placeholder\\'><div style=\\'font-size:2.5rem;\\'>🏭</div><div class=\\'machine-img-placeholder-label\\'><strong>${m.name}</strong><br>${m.sub}</div><div class=\\'machine-img-path\\'>${m.img}</div></div>'">
+        </div>
+
+        <table class="props-table">
+          <tr><td>Matière entrée</td><td>${p.entree}</td></tr>
+          <tr><td>Produit sortie</td><td>${p.sortie}</td></tr>
+        </table>
+      </div>
+
+    </div>`;
+}
+
+function getSimilarApps(grade, machine) {
+  const out = [];
+  sectors.forEach(s => s.products.forEach(p => {
+    if ((p.grade===grade||p.machine===machine) && p.name!==currentProduct.name)
+      out.push({sector:s.id, name:p.name});
+  }));
+  return out.slice(0,7);
+}
+
+function findAndSelect(sectorId, productName) {
+  currentSector = sectors.find(s=>s.id===sectorId);
+  renderProducts(currentSector);
+  selectProduct(currentSector.products.findIndex(p=>p.name===productName));
+}
+
+function updateBreadcrumb(items) {
+  document.getElementById('breadcrumb').innerHTML = items.map((item,i) =>
+    i===items.length-1
+      ? `<span class="breadcrumb-current">${item.label}</span>`
+      : `<span class="breadcrumb-item" onclick="${item.action}()">${item.label}</span><span class="breadcrumb-sep">›</span>`
+  ).join('');
+}
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showSectors() {
+  showView('view-sectors');
+  document.getElementById('breadcrumb').innerHTML='<span class="breadcrumb-current">Tous les secteurs</span>';
+}
+
+function showProducts() {
+  renderProducts(currentSector);
+  showView('view-products');
+  updateBreadcrumb([{label:'Tous les secteurs',action:'showSectors'},{label:currentSector.name}]);
+}
+
+renderSectors();
+</script>
+</body>
+</html>

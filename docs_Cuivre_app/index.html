@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REDEX — Fils & Méplats de Cuivre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── LIGHT THEME (default) ── */
+  :root {
+    --cu: #C87941;
+    --cu-dark: #8B4E1F;
+    --cu-light: #F5E6D3;
+    --cu-pale: #FDF6EF;
+    --navy: #0F1B2D;
+    --navy-mid: #1E2F45;
+    --muted: #718096;
+    --border: rgba(200,121,65,0.15);
+    --border-strong: rgba(200,121,65,0.35);
+    --white: #FFFFFF;
+    --bg: #FAFAF8;
+    --card-bg: #FFFFFF;
+    --text: #0F1B2D;
+    --text-muted: #718096;
+    --radius: 16px;
+    --radius-sm: 8px;
+    --hero-bg: #0F1B2D;
+    --header-bg: #0F1B2D;
+    --breadcrumb-bg: #FFFFFF;
+    --stat-bg: #FAFAF8;
+    --badge-machine-bg: rgba(15,27,45,0.07);
+    --badge-machine-color: #1E2F45;
+    --badge-machine-border: rgba(15,27,45,0.12);
+    --props-row-bg: #FAFAF8;
+    --footer-bg: #0F1B2D;
+    --transition: background 0.3s, color 0.3s, border-color 0.3s;
+  }
+
+  /* ── DARK THEME ── */
+  [data-theme="dark"] {
+    --cu: #E09050;
+    --cu-dark: #C87941;
+    --cu-light: #2A1A0A;
+    --cu-pale: #1E1208;
+    --navy: #E8EAF0;
+    --navy-mid: #C8CCD8;
+    --muted: #8A95A8;
+    --border: rgba(224,144,80,0.18);
+    --border-strong: rgba(224,144,80,0.38);
+    --white: #1A1A2E;
+    --bg: #0D0D1A;
+    --card-bg: #141426;
+    --text: #E8EAF0;
+    --text-muted: #8A95A8;
+    --hero-bg: #08080F;
+    --header-bg: #0A0A18;
+    --breadcrumb-bg: #141426;
+    --stat-bg: #1A1A2E;
+    --badge-machine-bg: rgba(200,180,255,0.08);
+    --badge-machine-color: #C8CCD8;
+    --badge-machine-border: rgba(200,180,255,0.15);
+    --props-row-bg: #1A1A2E;
+    --footer-bg: #08080F;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: var(--transition); }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--header-bg); padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px; position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid rgba(200,121,65,0.25);
+    transition: var(--transition);
+  }
+  .header-left { display: flex; flex-direction: column; gap: 2px; }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; color: #FFFFFF; letter-spacing: 0.05em; }
+  .logo span { color: var(--cu); }
+  .header-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.4); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* ── CONTROLS (lang + theme) ── */
+  .header-controls { display: flex; align-items: center; gap: 8px; }
+
+  .ctrl-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px; padding: 6px 12px; cursor: pointer;
+    color: rgba(255,255,255,0.75); font-size: 0.75rem; font-weight: 500;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+  }
+  .ctrl-btn:hover { background: rgba(200,121,65,0.2); border-color: rgba(200,121,65,0.4); color: var(--cu); }
+  .ctrl-btn .icon { font-size: 0.9rem; line-height: 1; }
+
+  /* Lang pill — active segment */
+  .lang-btn { padding: 4px; gap: 0; }
+  .lang-seg {
+    padding: 4px 10px; border-radius: 14px; font-size: 0.72rem; font-weight: 600;
+    transition: all 0.2s; color: rgba(255,255,255,0.45);
+  }
+  .lang-seg.active { background: var(--cu); color: #fff; }
+
+  /* ── HERO ── */
+  .hero { background: var(--hero-bg); padding: 4rem 2.5rem 3rem; position: relative; overflow: hidden; transition: var(--transition); }
+  .hero::before {
+    content: 'Cu'; position: absolute; right: -2rem; top: -1rem;
+    font-family: 'Syne', sans-serif; font-size: 14rem; font-weight: 800;
+    color: rgba(200,121,65,0.06); line-height: 1; pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-block; background: rgba(200,121,65,0.15); color: var(--cu);
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(200,121,65,0.3); margin-bottom: 1.2rem;
+  }
+  .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; color: #FFFFFF; line-height: 1.15; max-width: 600px; margin-bottom: 1rem; }
+  .hero h1 em { font-style: normal; color: var(--cu); }
+  .hero-desc { color: rgba(255,255,255,0.5); font-size: 0.95rem; max-width: 480px; line-height: 1.7; margin-bottom: 2rem; }
+  .hero-stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+  .hero-stat-num { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--cu); }
+  .hero-stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    background: var(--breadcrumb-bg); border-bottom: 1px solid var(--border);
+    padding: 0.85rem 2.5rem; display: flex; align-items: center; gap: 8px;
+    font-size: 0.8rem; flex-wrap: wrap; transition: var(--transition);
+  }
+  .breadcrumb-item { cursor: pointer; color: var(--cu); font-weight: 500; transition: opacity 0.2s; }
+  .breadcrumb-item:hover { opacity: 0.7; }
+  .breadcrumb-sep { color: var(--border-strong); }
+  .breadcrumb-current { color: var(--text); font-weight: 500; }
+
+  /* ── MAIN ── */
+  main { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem; }
+  .section-header { margin-bottom: 1.8rem; }
+  .section-label { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cu); font-weight: 500; margin-bottom: 0.4rem; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text); }
+
+  /* ── VIEWS ── */
+  .view { display: none; animation: fadeIn 0.35s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── SECTORS ── */
+  .sectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+  .sector-card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.8rem; cursor: pointer; transition: all 0.25s ease; position: relative; overflow: hidden;
+  }
+  .sector-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--cu); transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease; }
+  .sector-card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.15); }
+  .sector-card:hover::after { transform: scaleX(1); }
+  .sector-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--cu-light); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1.2rem; }
+  .sector-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+  .sector-count { font-size: 0.78rem; color: var(--text-muted); }
+  .sector-arrow { position: absolute; top: 1.8rem; right: 1.8rem; width: 28px; height: 28px; border-radius: 50%; background: var(--cu-pale); display: flex; align-items: center; justify-content: center; color: var(--cu); font-size: 0.85rem; transition: all 0.2s; }
+  .sector-card:hover .sector-arrow { background: var(--cu); color: #fff; }
+  .sector-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1rem; }
+  .sector-tag { font-size: 0.68rem; background: var(--cu-pale); color: var(--cu-dark); border-radius: 20px; padding: 3px 10px; border: 1px solid var(--border); }
+
+  /* ── PRODUCTS ── */
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.1rem; }
+  .product-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all 0.25s ease; overflow: hidden; display: flex; flex-direction: column; }
+  .product-card:hover { border-color: var(--cu); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(200,121,65,0.12); }
+  .product-img-wrap { width: 100%; height: 160px; overflow: hidden; background: var(--cu-light); position: relative; flex-shrink: 0; }
+  .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+  .product-card:hover .product-img-wrap img { transform: scale(1.06); }
+  .product-img-grade { position: absolute; top: 10px; right: 10px; background: var(--hero-bg); color: var(--cu); font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; }
+  .product-body { padding: 1.2rem; flex: 1; }
+  .product-name { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; line-height: 1.3; }
+  .product-semi { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.8rem; }
+  .product-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+  .badge { font-size: 0.63rem; font-weight: 500; padding: 3px 7px; border-radius: 4px; }
+  .badge-machine { background: var(--badge-machine-bg); color: var(--badge-machine-color); border: 1px solid var(--badge-machine-border); }
+  .badge-in { background: #EDF2FF; color: #2B4CC8; border: 1px solid #BFD0FF; }
+  .badge-out { background: #F0FFF4; color: #1A6B35; border: 1px solid #B5E5C5; }
+  [data-theme="dark"] .badge-in { background: rgba(43,76,200,0.15); color: #7B9FFF; border-color: rgba(43,76,200,0.3); }
+  [data-theme="dark"] .badge-out { background: rgba(26,107,53,0.15); color: #5DBF7A; border-color: rgba(26,107,53,0.3); }
+
+  /* ── DETAIL ── */
+  .detail-top { display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem; margin-bottom: 1.5rem; align-items: start; }
+  .detail-img-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .detail-img-wrap { width: 100%; height: 250px; background: var(--cu-light); overflow: hidden; position: relative; }
+  .detail-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-img-caption { padding: 1rem 1.2rem; border-top: 1px solid var(--border); }
+  .detail-img-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+  .detail-img-semi { font-size: 0.78rem; color: var(--text-muted); }
+  .detail-cards-col { display: flex; flex-direction: column; gap: 1rem; }
+  .detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .detail-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.6rem; transition: var(--transition); }
+  .detail-card-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cu); margin-bottom: 1.1rem; display: flex; align-items: center; gap: 8px; }
+  .detail-card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Grade */
+  .grade-hero { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1.1rem; background: var(--hero-bg); border-radius: 10px; margin-bottom: 1rem; }
+  .grade-symbol { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--cu); }
+  .grade-full-name { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .grade-nfa { font-size: 0.63rem; background: rgba(200,121,65,0.2); color: var(--cu); border-radius: 4px; padding: 2px 7px; margin-top: 4px; display: inline-block; }
+
+  /* Gauges */
+  .gauge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .gauge-label { font-size: 0.72rem; color: var(--text-muted); width: 115px; flex-shrink: 0; }
+  .gauge-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .gauge-fill { height: 100%; background: linear-gradient(90deg, var(--cu-dark), var(--cu)); border-radius: 3px; }
+  .gauge-val { font-size: 0.67rem; font-weight: 500; color: var(--text); width: 68px; text-align: right; flex-shrink: 0; }
+
+  /* Props table */
+  .props-table { width: 100%; border-collapse: separate; border-spacing: 0 7px; }
+  .props-table td { padding: 8px 12px; font-size: 0.79rem; }
+  .props-table tr td:first-child { color: var(--text-muted); width: 45%; background: var(--props-row-bg); border-radius: 8px 0 0 8px; }
+  .props-table tr td:last-child { font-weight: 500; color: var(--text); background: var(--props-row-bg); border-radius: 0 8px 8px 0; }
+
+  /* Machine */
+  .machine-top { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--cu-pale); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem; }
+  .machine-icon-big { width: 46px; height: 46px; border-radius: 10px; background: var(--cu); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+  .machine-name { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .machine-sub { font-size: 0.7rem; color: var(--text-muted); margin: 2px 0 5px; }
+  .machine-desc { font-size: 0.77rem; color: var(--text); line-height: 1.6; }
+  .machine-img-wrap { width: 100%; height: 185px; border-radius: 10px; overflow: hidden; background: var(--cu-light); border: 1px solid var(--border); margin-bottom: 1rem; }
+  .machine-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .machine-img-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, var(--cu-light), var(--cu-pale)); }
+  .machine-img-placeholder-label { font-size: 0.7rem; color: var(--text-muted); text-align: center; padding: 0 1rem; line-height: 1.5; }
+  .machine-img-path { font-size: 0.62rem; color: var(--text-muted); opacity: 0.6; font-family: monospace; }
+
+  /* Process */
+  .process-flow { display: flex; align-items: center; flex-wrap: wrap; margin: 0.5rem 0; }
+  .process-box { background: var(--cu-pale); border: 1.5px solid var(--border-strong); border-radius: 8px; padding: 9px 12px; text-align: center; }
+  .process-box-label { font-size: 0.63rem; color: var(--text-muted); margin-bottom: 2px; }
+  .process-box-val { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--text); }
+  .process-arrow { width: 26px; height: 2px; background: var(--cu); position: relative; flex-shrink: 0; }
+  .process-arrow::after { content: ''; position: absolute; right: -1px; top: -4px; border-left: 7px solid var(--cu); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+
+  /* App chips */
+  .app-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--cu-pale); border: 1px solid var(--border); border-radius: 20px; padding: 4px 11px; font-size: 0.69rem; color: var(--cu-dark); margin: 3px; cursor: pointer; transition: all 0.2s; }
+  .app-chip:hover { background: var(--cu); color: #fff; border-color: var(--cu); }
+
+  /* Back */
+  .back-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--cu); font-weight: 500; cursor: pointer; margin-bottom: 1.8rem; padding: 7px 14px; background: var(--cu-pale); border: 1px solid var(--border); border-radius: 20px; transition: all 0.2s; }
+  .back-btn:hover { background: var(--cu); color: #fff; border-color: var(--cu); }
+
+  /* Desc */
+  .desc-box { padding: 0.9rem 1rem; background: var(--cu-pale); border-radius: 8px; border: 1px solid var(--border); font-size: 0.79rem; color: var(--text); line-height: 1.65; }
+  .desc-label { font-size: 0.63rem; color: var(--text-muted); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-cell { padding: 8px 10px; background: var(--stat-bg); border-radius: 8px; font-size: 0.75rem; }
+  .stat-cell-label { color: var(--text-muted); margin-bottom: 2px; font-size: 0.68rem; }
+  .stat-cell-val { font-weight: 600; color: var(--text); }
+
+  /* Footer */
+  footer { background: var(--footer-bg); color: rgba(255,255,255,0.35); text-align: center; padding: 1.5rem; font-size: 0.75rem; margin-top: 4rem; border-top: 1px solid rgba(200,121,65,0.2); }
+
+  /* Responsive */
+  @media (max-width: 900px) { .detail-top { grid-template-columns: 1fr; } .detail-layout { grid-template-columns: 1fr; } }
+  @media (max-width: 680px) { header { padding: 0 1rem; } .header-subtitle { display: none; } .hero { padding: 2.5rem 1.2rem 2rem; } .breadcrumb { padding: 0.7rem 1.2rem; } main { padding: 1.5rem 1rem; } .sectors-grid { grid-template-columns: 1fr; } .products-grid { grid-template-columns: 1fr 1fr; } .ctrl-btn span.label { display: none; } }
+  @media (max-width: 400px) { .products-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">RE<span>DEX</span></div>
+    <div class="header-subtitle" id="hdr-sub">Fils &amp; Méplats de Cuivre</div>
+  </div>
+  <div class="header-controls">
+    <!-- Language toggle -->
+    <div class="ctrl-btn lang-btn" onclick="toggleLang()" title="Changer la langue / Switch language">
+      <span class="lang-seg active" id="seg-fr">FR</span>
+      <span class="lang-seg" id="seg-en">EN</span>
+    </div>
+    <!-- Theme toggle -->
+    <button class="ctrl-btn" onclick="toggleTheme()" id="theme-btn" title="Changer le thème">
+      <span class="icon" id="theme-icon">🌙</span>
+      <span class="label" id="theme-label">Sombre</span>
+    </button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-tag" id="hero-tag">Base de données interactive</div>
+  <h1 id="hero-title">Obtention de <em>fils</em> et<br>méplats de <em>cuivre</em></h1>
+  <p class="hero-desc" id="hero-desc">Explorez les secteurs d'application, les grades de cuivre et les machines REDEX selon vos besoins industriels.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label" data-i18n="sectors">Secteurs</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">22+</div><div class="hero-stat-label" data-i18n="applications">Applications</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label" data-i18n="grades">Grades Cu</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label" data-i18n="machines">Machines REDEX</div></div>
+  </div>
+</div>
+
+<div class="breadcrumb" id="breadcrumb">
+  <span class="breadcrumb-current" data-i18n="allSectors">Tous les secteurs</span>
+</div>
+
+<main>
+  <div class="view active" id="view-sectors">
+    <div class="section-header">
+      <div class="section-label" data-i18n="sectorActivity">Secteurs d'activité</div>
+      <div class="section-title" data-i18n="selectSector">Sélectionnez un secteur</div>
+    </div>
+    <div class="sectors-grid" id="sectors-grid"></div>
+  </div>
+
+  <div class="view" id="view-products">
+    <span class="back-btn" onclick="showSectors()" id="back-sectors">← Retour aux secteurs</span>
+    <div class="section-header">
+      <div class="section-label" id="prod-sector-label"></div>
+      <div class="section-title" id="prod-sector-title"></div>
+    </div>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+
+  <div class="view" id="view-detail">
+    <span class="back-btn" onclick="showProducts()" id="back-products">← Retour aux applications</span>
+    <div class="section-header">
+      <div class="section-label" id="detail-sector-label"></div>
+      <div class="section-title" id="detail-product-title"></div>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</main>
+
+<footer id="footer-text">© 2025 REDEX · Projet de stage — Livia Viana Aguiar de Oliveira</footer>
+
+<script>
+// ── I18N ─────────────────────────────────────────────────────────
+const i18n = {
+  fr: {
+    allSectors: 'Tous les secteurs',
+    sectorActivity: "Secteurs d'activité",
+    selectSector: 'Sélectionnez un secteur',
+    applications: 'Applications',
+    sectors: 'Secteurs',
+    grades: 'Grades Cu',
+    machines: 'Machines REDEX',
+    backSectors: '← Retour aux secteurs',
+    backProducts: '← Retour aux applications',
+    heroTag: 'Base de données interactive',
+    heroTitle: 'Obtention de <em>fils</em> et<br>méplats de <em>cuivre</em>',
+    heroDesc: "Explorez les secteurs d'application, les grades de cuivre et les machines REDEX selon vos besoins industriels.",
+    headerSub: 'Fils &amp; Méplats de Cuivre',
+    themeLight: 'Clair', themeDark: 'Sombre',
+    availableApps: 'Applications disponibles',
+    sectorLabel: 'Secteur · ',
+    transformFlow: 'Flux de transformation',
+    cuGrade: 'Grade de cuivre',
+    cuProps: 'Propriétés — ',
+    machineRedex: 'Machine REDEX — ',
+    input: 'Entrée', machine: 'Machine', output: 'Sortie',
+    purity: 'Pureté', nfa: 'Équiv. NFA 51-050', sensitivity: 'Sensibilité H₂',
+    matInput: 'Matière entrée', matOutput: 'Produit sortie',
+    description: 'Description', similarApps: 'Applications similaires',
+    elCond: 'Conductivité él.', thCond: 'Conductivité th.', weldability: 'Soudabilité',
+    appCount: (n) => `${n} application${n>1?'s':''}`,
+  },
+  en: {
+    allSectors: 'All sectors',
+    sectorActivity: 'Activity sectors',
+    selectSector: 'Select a sector',
+    applications: 'Applications',
+    sectors: 'Sectors',
+    grades: 'Cu Grades',
+    machines: 'REDEX Machines',
+    backSectors: '← Back to sectors',
+    backProducts: '← Back to applications',
+    heroTag: 'Interactive database',
+    heroTitle: 'Production of copper <em>wires</em><br>and <em>flat bars</em>',
+    heroDesc: 'Explore application sectors, copper grades and REDEX machines for your industrial needs.',
+    headerSub: 'Copper Wires &amp; Flat Bars',
+    themeLight: 'Light', themeDark: 'Dark',
+    availableApps: 'Available applications',
+    sectorLabel: 'Sector · ',
+    transformFlow: 'Transformation flow',
+    cuGrade: 'Copper grade',
+    cuProps: 'Properties — ',
+    machineRedex: 'REDEX Machine — ',
+    input: 'Input', machine: 'Machine', output: 'Output',
+    purity: 'Purity', nfa: 'Equiv. NFA 51-050', sensitivity: 'H₂ sensitivity',
+    matInput: 'Input material', matOutput: 'Output product',
+    description: 'Description', similarApps: 'Similar applications',
+    elCond: 'El. conductivity', thCond: 'Th. conductivity', weldability: 'Weldability',
+    appCount: (n) => `${n} application${n>1?'s':''}`,
+  }
+};
+
+let lang = 'fr';
+let theme = 'light';
+
+function t(key, ...args) {
+  const val = i18n[lang][key];
+  return typeof val === 'function' ? val(...args) : val;
+}
+
+function toggleLang() {
+  lang = lang === 'fr' ? 'en' : 'fr';
+  document.getElementById('seg-fr').classList.toggle('active', lang==='fr');
+  document.getElementById('seg-en').classList.toggle('active', lang==='en');
+  applyLang();
+  // re-render current view
+  if (document.getElementById('view-sectors').classList.contains('active')) renderSectors();
+  else if (document.getElementById('view-products').classList.contains('active')) renderProducts(currentSector);
+  else if (currentProduct) renderDetail(currentProduct);
+}
+
+function applyLang() {
+  document.getElementById('hdr-sub').innerHTML = t('headerSub');
+  document.getElementById('hero-tag').textContent = t('heroTag');
+  document.getElementById('hero-title').innerHTML = t('heroTitle');
+  document.getElementById('hero-desc').textContent = t('heroDesc');
+  document.getElementById('back-sectors').textContent = t('backSectors');
+  document.getElementById('back-products').textContent = t('backProducts');
+  document.getElementById('prod-sector-title').textContent = t('availableApps');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    if (i18n[lang][k]) el.textContent = i18n[lang][k];
+  });
+  // Breadcrumb update
+  updateBreadcrumbLabels();
+}
+
+function toggleTheme() {
+  theme = theme === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+  document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+  document.getElementById('theme-label').textContent = theme === 'dark' ? t('themeLight') : t('themeDark');
+}
+
+// ── GRADE DATA ───────────────────────────────────────────────────
+const gradeData = {
+  'Cu-ETP': {
+    name: 'Copper Electrolytic Tough-Pitch', nfa: 'Cu/a1', purity: '≥ 99,90 %',
+    conductEl: '100% IACS', conductTh: '393 W/m.K',
+    weldability: { fr: 'Non recommandé', en: 'Not recommended' },
+    sensitivity: { fr: 'Sensible (H₂)', en: 'Sensitive (H₂)' },
+    gauge: { el: 100, th: 99, soud: 10 },
+    description: {
+      fr: "Grade le plus courant. Excellent conducteur électrique, utilisé dans la majorité des applications électriques et de transport. Sensible aux atmosphères réductrices à haute température (fragilisation par H₂). Obtenu par affinage électrolytique.",
+      en: "Most common grade. Excellent electrical conductor used in most electrical and transport applications. Sensitive to reducing atmospheres at high temperature (H₂ embrittlement). Obtained by electrolytic refining."
+    }
+  },
+  'Cu-DHP': {
+    name: 'Copper Deoxided High-Phosphorus', nfa: 'Cu/b1', purity: '≥ 99,90 %',
+    conductEl: '≥ 75% IACS', conductTh: '305 W/m.K',
+    weldability: { fr: 'Excellente', en: 'Excellent' },
+    sensitivity: { fr: 'Insensible', en: 'Insensitive' },
+    gauge: { el: 75, th: 77, soud: 100 },
+    description: {
+      fr: "Désoxydé au phosphore (0,013–0,050%). Conductivité électrique réduite mais excellente soudabilité. Insensible aux atmosphères réductrices. Idéal pour la plomberie, les tubes et la chaudronnerie.",
+      en: "Deoxidized with phosphorus (0.013–0.050%). Reduced electrical conductivity but excellent weldability. Insensitive to reducing atmospheres. Ideal for plumbing, tubes and boilermaking."
+    }
+  },
+  'Cu-DLP': {
+    name: 'Copper Deoxided Low-Phosphorus', nfa: 'Cu/b2', purity: '≥ 99,90 %',
+    conductEl: '92% IACS', conductTh: '380 W/m.K',
+    weldability: { fr: 'Bonne', en: 'Good' },
+    sensitivity: { fr: 'Insensible', en: 'Insensitive' },
+    gauge: { el: 92, th: 96, soud: 80 },
+    description: {
+      fr: "Compromis optimal entre conductivité électrique et soudabilité. Phosphore résiduel faible (0,005–0,012%). Très polyvalent pour les applications nécessitant bonnes propriétés électriques et aptitude au soudage.",
+      en: "Optimal compromise between electrical conductivity and weldability. Low residual phosphorus (0.005–0.012%). Very versatile for applications requiring both good electrical properties and weldability."
+    }
+  },
+  'Cu-OF': {
+    name: 'Copper Oxygen-Free', nfa: 'Cu/c1', purity: '≥ 99,95 %',
+    conductEl: '102% IACS', conductTh: '394 W/m.K',
+    weldability: { fr: 'Excellente', en: 'Excellent' },
+    sensitivity: { fr: 'Insensible', en: 'Insensitive' },
+    gauge: { el: 100, th: 100, soud: 100 },
+    description: {
+      fr: "Haute pureté, sans oxygène. Conductivité maximale, insensible aux atmosphères réductrices. Grade premium obtenu par refusion sous atmosphère contrôlée. Indispensable pour l'électronique de précision et les câbles haute performance.",
+      en: "High purity, oxygen-free. Maximum conductivity, insensitive to reducing atmospheres. Premium grade obtained by remelting under controlled atmosphere. Essential for precision electronics and high-performance cables."
+    }
+  }
+};
+
+// ── MACHINE DATA ─────────────────────────────────────────────────
+const machineData = {
+  'RM': {
+    icon: '⚙️', img: 'images/machines/RM_machine.jpg',
+    full: { fr: 'Reduction Rolling Mills', en: 'Reduction Rolling Mills' },
+    sub: { fr: 'Laminoir de réduction à fils', en: 'Wire reduction rolling mill' },
+    desc: {
+      fr: 'Transforme un fil machine rond (copper rod) en fil rond de diamètre réduit précis. Machine haute vitesse, multi-passes, pour fils électriques, magnet wires et câbles.',
+      en: 'Transforms round copper rod into a precisely reduced round wire. High-speed, multi-pass machine for electrical wires, magnet wires and cables.'
+    }
+  },
+  'RMW': {
+    icon: '🔩', img: 'images/machines/RMW_machine.jpg',
+    full: { fr: 'Rectangular Magnet Wire Rolling Mill', en: 'Rectangular Magnet Wire Rolling Mill' },
+    sub: { fr: 'Laminoir à fil magnétique rectangulaire', en: 'Rectangular magnet wire rolling mill' },
+    desc: {
+      fr: "Convertit un fil rond en fil plat (méplat) rectangulaire. La Shaping Unit garantit les tolérances dimensionnelles strictes requises pour les magnet wires et busbars.",
+      en: "Converts round wire into rectangular flat wire. The Shaping Unit ensures strict dimensional tolerances required for magnet wires and busbars."
+    }
+  },
+  'FRM': {
+    icon: '🏭', img: 'images/machines/FRM_machine.jpg',
+    full: { fr: 'Flat Rolling Mills', en: 'Flat Rolling Mills' },
+    sub: { fr: 'Laminoir de bandes', en: 'Strip rolling mill' },
+    desc: {
+      fr: "Lamine des barres ou blocs coulés pour produire des bandes larges et méplats. Configuration 2-Hi ou 4-Hi selon l'épaisseur et la précision requises.",
+      en: "Rolls bars or cast billets to produce wide strips and flat bars. 2-Hi or 4-Hi configuration depending on required thickness and precision."
+    }
+  }
+};
+
+// ── SECTOR DATA ──────────────────────────────────────────────────
+const sectorsData = [
+  { id: 'energie',
+    name: { fr: 'Énergie', en: 'Energy' }, icon: '⚡',
+    tags: { fr: ['Transformateurs','Générateurs','CTC'], en: ['Transformers','Generators','CTC'] },
+    products: [
+      { name:{fr:'Transformateur',en:'Transformer'}, semi:{fr:'Enroulement (bobine)',en:'Winding (coil)'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/transformateur.png' },
+      { name:{fr:'Conducteur électrique',en:'Electrical conductor'}, semi:{fr:'Câble électrique',en:'Electrical cable'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/conducteurelectrique.png' },
+      { name:{fr:'Générateur — Stator',en:'Generator — Stator'}, semi:{fr:'Enroulement stator',en:'Stator winding'}, grade:'Cu-OF', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/stator_generateur.jpg' },
+      { name:{fr:'Générateur — Roteur',en:'Generator — Rotor'}, semi:{fr:'Barres de cuivre du roteur',en:'Rotor copper bars'}, grade:'Cu-OF', machine:'FRM', entree:{fr:'Barre coulée',en:'Cast bar'}, sortie:{fr:'Bande',en:'Strip'}, img:'images/rotor_generateur.jpg' },
+      { name:{fr:'Générateur — CTC',en:'Generator — CTC'}, semi:{fr:'Conducteur transposé continu',en:'Continuously transposed conductor'}, grade:'Cu-OF', machine:'RMW', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil plat',en:'Flat wire'}, img:'images/ctc_generateur.png' },
+      { name:{fr:'CTC (câbles)',en:'CTC (cables)'}, semi:{fr:'Bande conductrice',en:'Conductive strip'}, grade:'Cu-OF', machine:'FRM', entree:{fr:'Barre coulée',en:'Cast bar'}, sortie:{fr:'Bande',en:'Strip'}, img:'images/CTC_cables.png' }
+    ]
+  },
+  { id: 'transport',
+    name: { fr: 'Transport', en: 'Transport' }, icon: '🚗',
+    tags: { fr: ['Câbles auto','EV','Ferroviaire'], en: ['Auto cables','EV','Railway'] },
+    products: [
+      { name:{fr:'Câbles pour voiture',en:'Automotive cables'}, semi:{fr:'Fil cuivre',en:'Copper wire'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/cables_voiture.png' },
+      { name:{fr:'Composants EV',en:'EV components'}, semi:{fr:'Magnet wires',en:'Magnet wires'}, grade:'Cu-OF', machine:'RMW', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil plat',en:'Flat wire'}, img:'images/composants_EV.png' },
+      { name:{fr:'Fils caténaires',en:'Catenary wires'}, semi:{fr:'Câble de contact',en:'Contact cable'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Profil extrudé',en:'Extruded profile'}, img:'images/fils_catenaires.png' }
+    ]
+  },
+  { id: 'electronique',
+    name: { fr: 'Électronique', en: 'Electronics' }, icon: '💻',
+    tags: { fr: ['PCB','Busbars','Semi-conducteurs'], en: ['PCB','Busbars','Semiconductors'] },
+    products: [
+      { name:{fr:'Inducteur',en:'Inductor'}, semi:{fr:'Enroulement',en:'Winding'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/inducteur.png' },
+      { name:{fr:'Plaque de circuit',en:'Circuit board'}, semi:{fr:'Plaque / Bande',en:'Plate / Strip'}, grade:'Cu-ETP', machine:'FRM', entree:{fr:'Barre coulée',en:'Cast bar'}, sortie:{fr:'Bande',en:'Strip'}, img:'images/plaques_ckts.png' },
+      { name:{fr:'Busbars',en:'Busbars'}, semi:{fr:'Barre rectangulaire',en:'Rectangular bar'}, grade:'Cu-ETP', machine:'FRM', entree:{fr:'Barre coulée',en:'Cast bar'}, sortie:{fr:'Bande',en:'Strip'}, img:'images/busbars.png' },
+      { name:{fr:'Puces électroniques',en:'Electronic chips'}, semi:{fr:'Plaque semiconducteur',en:'Semiconductor plate'}, grade:'Cu-OF', machine:'FRM', entree:{fr:'Barre coulée',en:'Cast bar'}, sortie:{fr:'Bande',en:'Strip'}, img:'images/puces_electroniques.png' },
+      { name:{fr:'Dissipateur thermique',en:'Heat sink'}, semi:{fr:'Bande',en:'Strip'}, grade:'Cu-OF', machine:'FRM', entree:{fr:'Barre coulée',en:'Cast bar'}, sortie:{fr:'Bande',en:'Strip'}, img:'images/dissipateur_thermique_electronic.png' },
+      { name:{fr:'Rubans PV',en:'PV ribbons'}, semi:{fr:'Fil plat photovoltaïque',en:'Photovoltaic flat wire'}, grade:'Cu-OF', machine:'RMW', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil plat',en:'Flat wire'}, img:'images/ruban_interconnexionPV.png' },
+      { name:{fr:'HFI Speaker Cable',en:'HFI Speaker Cable'}, semi:{fr:'Câble audio Hi-Fi',en:'Hi-Fi audio cable'}, grade:'Cu-OF', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/HFI_speaker_cable.png' }
+    ]
+  },
+  { id: 'automobile',
+    name: { fr: 'Automobile', en: 'Automotive' }, icon: '🏎️',
+    tags: { fr: ['Faisceau','Alternateur','Batterie EV'], en: ['Wiring harness','Alternator','EV Battery'] },
+    products: [
+      { name:{fr:'Faisceau électrique',en:'Wiring harness'}, semi:{fr:'Câble',en:'Cable'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/faisceu_voiture.png' },
+      { name:{fr:'Busbar batterie EV',en:'EV battery busbar'}, semi:{fr:'Barre rectangulaire',en:'Rectangular bar'}, grade:'Cu-ETP', machine:'FRM', entree:{fr:'Barre coulée',en:'Cast bar'}, sortie:{fr:'Bande',en:'Strip'}, img:'images/busbar_batterieEV.png' },
+      { name:{fr:'Alternateur',en:'Alternator'}, semi:{fr:'Enroulement roteur',en:'Rotor winding'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/alternateur_vehicule.png' },
+      { name:{fr:'Bobine électromagnétique',en:'Electromagnetic coil'}, semi:{fr:'Fil rond émaillé',en:'Enamelled round wire'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/bobine_electromag_voiture.png' }
+    ]
+  },
+  { id: 'bijoux',
+    name: { fr: 'Bijoux & Montres', en: 'Jewellery & Watches' }, icon: '💍',
+    tags: { fr: ['Colliers','Montres','Décoration'], en: ['Necklaces','Watches','Decoration'] },
+    products: [
+      { name:{fr:'Colliers ronds',en:'Round necklaces'}, semi:{fr:'Fil rond bijouterie',en:'Round jewellery wire'}, grade:'Cu-ETP', machine:'RM', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil rond',en:'Round wire'}, img:'images/coliers_rond.png' },
+      { name:{fr:'Colliers plats',en:'Flat necklaces'}, semi:{fr:'Fil plat bijouterie',en:'Flat jewellery wire'}, grade:'Cu-ETP', machine:'RMW', entree:{fr:'Copper rod',en:'Copper rod'}, sortie:{fr:'Fil plat',en:'Flat wire'}, img:'images/coliers_plats.png' }
+    ]
+  }
+];
+
+// ── STATE ────────────────────────────────────────────────────────
+let currentSector = null, currentProduct = null;
+let breadcrumbState = [];
+
+function pn(p, field) { return p[field][lang]; }
+
+function mkImg(src, cssStyle, fallback) {
+  return `<img src="${src}" style="${cssStyle}" alt="" onerror="this.outerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:linear-gradient(135deg,var(--cu-light),var(--cu-pale));\\'>${fallback}</div>'">`;
+}
+
+// ── RENDER SECTORS ───────────────────────────────────────────────
+function renderSectors() {
+  document.getElementById('sectors-grid').innerHTML = sectorsData.map(s => `
+    <div class="sector-card" onclick="selectSector('${s.id}')">
+      <div class="sector-icon">${s.icon}</div>
+      <div class="sector-name">${s.name[lang]}</div>
+      <div class="sector-count">${t('appCount', s.products.length)}</div>
+      <div class="sector-tags">${s.tags[lang].map(tag=>`<span class="sector-tag">${tag}</span>`).join('')}</div>
+      <div class="sector-arrow">→</div>
+    </div>`).join('');
+}
+
+function selectSector(id) {
+  currentSector = sectorsData.find(s=>s.id===id);
+  renderProducts(currentSector);
+  showView('view-products');
+  breadcrumbState = [{label:()=>t('allSectors'),action:'showSectors'},{label:()=>currentSector.name[lang]}];
+  updateBreadcrumb(breadcrumbState);
+}
+
+function renderProducts(sector) {
+  document.getElementById('prod-sector-label').textContent = t('sectorLabel') + sector.name[lang];
+  document.getElementById('prod-sector-title').textContent = t('availableApps');
+  document.getElementById('products-grid').innerHTML = sector.products.map((p,i)=>`
+    <div class="product-card" onclick="selectProduct(${i})">
+      <div class="product-img-wrap">
+        ${mkImg(p.img,'width:100%;height:100%;object-fit:cover;transition:transform .4s','🔩')}
+        <div class="product-img-grade">${p.grade}</div>
+      </div>
+      <div class="product-body">
+        <div class="product-name">${pn(p,'name')}</div>
+        <div class="product-semi">${pn(p,'semi')}</div>
+        <div class="product-badges">
+          <span class="badge badge-machine">${p.machine}</span>
+          <span class="badge badge-in">↳ ${pn(p,'entree')}</span>
+          <span class="badge badge-out">→ ${pn(p,'sortie')}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function selectProduct(idx) {
+  currentProduct = currentSector.products[idx];
+  renderDetail(currentProduct);
+  showView('view-detail');
+  breadcrumbState = [
+    {label:()=>t('allSectors'),action:'showSectors'},
+    {label:()=>currentSector.name[lang],action:'showProducts'},
+    {label:()=>pn(currentProduct,'name')}
+  ];
+  updateBreadcrumb(breadcrumbState);
+}
+
+function renderDetail(p) {
+  document.getElementById('detail-sector-label').textContent = currentSector.name[lang] + ' · ' + pn(p,'semi');
+  document.getElementById('detail-product-title').textContent = pn(p,'name');
+  const g = gradeData[p.grade];
+  const m = machineData[p.machine];
+  const similar = getSimilarApps(p.grade, p.machine);
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-top">
+      <div class="detail-img-card">
+        <div class="detail-img-wrap">${mkImg(p.img,'width:100%;height:100%;object-fit:cover;','🔩')}</div>
+        <div class="detail-img-caption">
+          <div class="detail-img-name">${pn(p,'name')}</div>
+          <div class="detail-img-semi">${pn(p,'semi')}</div>
+        </div>
+      </div>
+      <div class="detail-cards-col">
+        <div class="detail-card" style="padding:1.3rem;">
+          <div class="detail-card-title">${t('transformFlow')}</div>
+          <div class="process-flow">
+            <div class="process-box"><div class="process-box-label">${t('input')}</div><div class="process-box-val">${pn(p,'entree')}</div></div>
+            <div class="process-arrow"></div>
+            <div class="process-box" style="background:var(--hero-bg);border-color:var(--cu);">
+              <div class="process-box-label" style="color:rgba(255,255,255,0.5);">${t('machine')}</div>
+              <div class="process-box-val" style="color:var(--cu);">${p.machine}</div>
+            </div>
+            <div class="process-arrow"></div>
+            <div class="process-box" style="background:rgba(26,107,53,0.08);border-color:rgba(26,107,53,0.35);">
+              <div class="process-box-label" style="color:rgba(26,107,53,0.7);">${t('output')}</div>
+              <div class="process-box-val" style="color:#4CAF70;">${pn(p,'sortie')}</div>
+            </div>
+          </div>
+        </div>
+        <div class="detail-card" style="padding:1.3rem;">
+          <div class="detail-card-title">${t('cuGrade')}</div>
+          <div class="grade-hero" style="margin-bottom:0.9rem;">
+            <div><div class="grade-symbol">${p.grade}</div><div class="grade-full-name">${g.name}</div><div class="grade-nfa">≡ ${g.nfa} (NFA 51-050)</div></div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-cell"><div class="stat-cell-label">${t('elCond')}</div><div class="stat-cell-val">${g.conductEl}</div></div>
+            <div class="stat-cell"><div class="stat-cell-label">${t('thCond')}</div><div class="stat-cell-val">${g.conductTh}</div></div>
+            <div class="stat-cell"><div class="stat-cell-label">${t('purity')}</div><div class="stat-cell-val">${g.purity}</div></div>
+            <div class="stat-cell"><div class="stat-cell-label">${t('weldability')}</div><div class="stat-cell-val" style="font-size:0.67rem;">${g.weldability[lang]}</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <div class="detail-card">
+        <div class="detail-card-title">${t('cuProps')}${p.grade}</div>
+        <div class="gauge-row"><span class="gauge-label">${t('elCond')}</span><div class="gauge-track"><div class="gauge-fill" style="width:${Math.min(g.gauge.el,100)}%"></div></div><span class="gauge-val">${g.conductEl}</span></div>
+        <div class="gauge-row"><span class="gauge-label">${t('thCond')}</span><div class="gauge-track"><div class="gauge-fill" style="width:${g.gauge.th}%"></div></div><span class="gauge-val">${g.conductTh}</span></div>
+        <div class="gauge-row"><span class="gauge-label">${t('weldability')}</span><div class="gauge-track"><div class="gauge-fill" style="width:${g.gauge.soud}%"></div></div><span class="gauge-val" style="font-size:0.6rem;">${g.weldability[lang]}</span></div>
+        <table class="props-table" style="margin-top:0.5rem;">
+          <tr><td>${t('purity')}</td><td>${g.purity}</td></tr>
+          <tr><td>${t('nfa')}</td><td>${g.nfa}</td></tr>
+          <tr><td>${t('sensitivity')}</td><td>${g.sensitivity[lang]}</td></tr>
+        </table>
+        <div style="margin-top:1rem;"><div class="desc-label">${t('description')}</div><div class="desc-box">${g.description[lang]}</div></div>
+        ${similar.length?`<div style="margin-top:1rem;"><div class="desc-label">${t('similarApps')}</div><div>${similar.map(a=>`<span class="app-chip" onclick="findAndSelect('${a.sector}','${a.nameKey}')">↗ ${a.name}</span>`).join('')}</div></div>`:''}
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card-title">${t('machineRedex')}${p.machine}</div>
+        <div class="machine-top">
+          <div class="machine-icon-big">${m.icon}</div>
+          <div>
+            <div class="machine-name">${m.full[lang]}</div>
+            <div class="machine-sub">${m.sub[lang]}</div>
+            <div class="machine-desc">${m.desc[lang]}</div>
+          </div>
+        </div>
+        <div class="machine-img-wrap">
+          <img src="${m.img}" alt="Machine ${p.machine}" style="width:100%;height:100%;object-fit:cover;"
+            onerror="this.parentElement.innerHTML='<div class=\\'machine-img-placeholder\\'><div style=\\'font-size:2.5rem;\\'>🏭</div><div class=\\'machine-img-placeholder-label\\'><strong>${p.machine}</strong><br>${m.sub[lang]}</div><div class=\\'machine-img-path\\'>${m.img}</div></div>'">
+        </div>
+        <table class="props-table">
+          <tr><td>${t('matInput')}</td><td>${pn(p,'entree')}</td></tr>
+          <tr><td>${t('matOutput')}</td><td>${pn(p,'sortie')}</td></tr>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────
+function getSimilarApps(grade, machine) {
+  const out = [];
+  sectorsData.forEach(s => s.products.forEach(p => {
+    if ((p.grade===grade||p.machine===machine) && pn(p,'name')!==pn(currentProduct,'name'))
+      out.push({sector:s.id, nameKey:pn(p,'name'), name:pn(p,'name')});
+  }));
+  return out.slice(0,7);
+}
+
+function findAndSelect(sectorId, productName) {
+  currentSector = sectorsData.find(s=>s.id===sectorId);
+  renderProducts(currentSector);
+  const idx = currentSector.products.findIndex(p=>pn(p,'name')===productName);
+  if (idx>=0) selectProduct(idx);
+}
+
+function updateBreadcrumb(states) {
+  document.getElementById('breadcrumb').innerHTML = states.map((item,i) =>
+    i===states.length-1
+      ? `<span class="breadcrumb-current">${item.label()}</span>`
+      : `<span class="breadcrumb-item" onclick="${item.action}()">${item.label()}</span><span class="breadcrumb-sep">›</span>`
+  ).join('');
+}
+
+function updateBreadcrumbLabels() {
+  if (breadcrumbState.length) updateBreadcrumb(breadcrumbState);
+  else document.getElementById('breadcrumb').innerHTML = `<span class="breadcrumb-current">${t('allSectors')}</span>`;
+}
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showSectors() {
+  showView('view-sectors');
+  breadcrumbState = [];
+  document.getElementById('breadcrumb').innerHTML=`<span class="breadcrumb-current">${t('allSectors')}</span>`;
+  renderSectors();
+}
+
+function showProducts() {
+  renderProducts(currentSector);
+  showView('view-products');
+  breadcrumbState = [{label:()=>t('allSectors'),action:'showSectors'},{label:()=>currentSector.name[lang]}];
+  updateBreadcrumb(breadcrumbState);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+renderSectors();
+</script>
+</body>
+</html>
